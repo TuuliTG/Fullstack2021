@@ -6,24 +6,32 @@ const Button = (props) => (
   </button>
 )
 
-const Label = (props) => (
-  <label>
-    {props.value}
-  </label>
-)
+const StatisticsLine = (props) => {
+  let value = props.value 
 
-const StatisticsLine = (props) => (
-  <>
-    <p>{props.text} <span><Label value={props.value}/></span></p>
-  </>
-)
+  if (props.text === "Positive") {
+    value = value * 100
+    value = value.toFixed(1)
+    return (
+      <>
+        <td>{props.text}</td>
+        <td>{value} %</td>
+      </>
+    )
+  }
+  return (
+    <>
+      <td>{props.text}</td>
+      <td>{value} </td>
+    </>
+  )
+}
 
 
 const Statistics = (props) => {
   const sum = props.good - props.bad
-  console.log("good - bad ", sum)
-  const avg = sum / props.all
-  console.log("avg ", avg)
+  let avg = sum / props.all
+  avg = avg.toFixed(1)
   if (props.all === 0) {
     return (
       <div>
@@ -35,28 +43,40 @@ const Statistics = (props) => {
   return (
     <div>
       <h1>Statistics</h1>
-      <StatisticsLine text="Good" value={props.good}/>
-      <StatisticsLine text="Neutral" value={props.neutral}/>
-      <StatisticsLine text="Bad" value={props.bad}/>
-      <StatisticsLine text="All" value={props.all}/>
-      <StatisticsLine text="Average" value={avg}/>
-      <StatisticsLine text="Positive" value={props.good/props.all}/>
+      <table>
+        <tbody>
+          <tr>
+          <StatisticsLine text="Good" value={props.good}/>
+          </tr>
+          <tr>
+          <StatisticsLine text="Neutral" value={props.neutral}/>
+          </tr>
+          <tr>
+          <StatisticsLine text="Bad" value={props.bad}/>
+          </tr>
+          <tr>
+          <StatisticsLine text="All" value={props.all}/>
+          </tr>
+          <tr>
+          <StatisticsLine text="Average" value={avg}/>
+          </tr>
+          <tr>
+          <StatisticsLine text="Positive" value={props.good/props.all}/>
+          </tr>
+        </tbody>
+      </table>
     </div>
   )
   
 }
 
-
-
 const App = () => {
-  // tallenna napit omaan tilaansa
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
 
   const increaseGood = () => {
     setGood(good + 1)
-    console.log("Increase good")
   }
   const increaseNeutral = () => {
     setNeutral(neutral + 1)
