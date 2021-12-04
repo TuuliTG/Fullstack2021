@@ -1,10 +1,7 @@
 import React from "react";
 import Country from "./Country";
-import Languages from "./Languages";
-import Weather from "./weather";
 
 const Countries = (props) => {
-    const api_key = process.env.REACT_APP_API_KEY
     const filtered = props.countries.filter(
         country => 
             country
@@ -35,10 +32,6 @@ const Countries = (props) => {
         return (
             <div>
                 <Country country={filtered[0]}></Country>
-                <h3>Languages</h3>
-                <Languages country={filtered[0]}></Languages>
-                <img src={filtered[0].flags.png} width="150"></img>
-                <Weather country={filtered[0]}></Weather>
             </div>
             
         )

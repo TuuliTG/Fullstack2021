@@ -24,7 +24,6 @@ const App = () => {
       <h2>Countries</h2>
       <Countries filter={searchBar} countries={countries} 
           onShow={country=>setSearchBarText(country.name.common)}>
-
       </Countries>
       
     </div>
