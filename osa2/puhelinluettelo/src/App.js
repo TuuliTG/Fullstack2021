@@ -3,12 +3,14 @@ import Persons from './components/Persons'
 import Search from './components/Search'
 import Form from './components/AddPersonForm'
 import personService from './services/persons'
+import Notification from './components/notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNumber] = useState('')
   const [searchBar, setSearchBar] = useState('')
+  const [message, setMessage] = useState(null)
 
   useEffect(() => {
     console.log('effect')
@@ -25,8 +27,9 @@ const App = () => {
     
     if (isAlreadyOnList) {
       if (window.confirm(`${newName} is already added to phonebook. Do you want to update the number?`)) {
-        const person = persons.find(p => p.name = newName)
-        updatePerson(person)
+        const person = persons.find(p => p.name === newName)
+        
+        updatePerson({person})
       } else {
         emptyForm() 
       }
@@ -43,20 +46,38 @@ const App = () => {
         .then(returnedPerson => {
           console.log('successful post')
           setPersons(persons.concat(returnedPerson))
-          emptyForm()   
+          emptyForm()
+          const text = `Added ${returnedPerson.name}`   
+          messageSetup(text, "message")
         })
     }
     
   }
 
-  const updatePerson = ({person}) => {
-    const changedPerson = { ...person, number: newNumber }
+  const messageSetup = ( message, classText ) => {
+    const msg = {text: message, classText: classText}
+    console.log("Message", msg)
+    setMessage(msg)
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
+  }
 
+  const updatePerson = ({person}) => {
+    console.log('Updating',{person})
+    const changedPerson = { ...person, number: newNumber }
+    
     personService
       .update(person.id, changedPerson)
       .then(returnedPerson => {
         setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
         emptyForm()
+        const text = `Updated ${returnedPerson.name}`
+        messageSetup(text, "message")
+      })
+      .catch(error => {
+        const text = `${person.name} was already deleted from the server.`
+        messageSetup(text, "error")
       })
   }
 
@@ -69,6 +90,8 @@ const App = () => {
         .then(returned => {
           console.log('deleted',returned)
           setPersons(persons.filter(p => p.id !== id))
+          const text = `Deleted ${name}`
+          messageSetup(text, 'message')
       })
     }
     
@@ -84,6 +107,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Search searchBar={searchBar} setSearchBar={setSearchBarText}></Search>
       <h2>Add a new contact</h2>
       <Form persons={persons} setName={setName} setNewNumber={setNewNumber} addPersons={addNewPersons} newName={newName}
