@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Persons from './components/Persons'
 import Search from './components/Search'
 import Form from './components/AddPersonForm'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -12,23 +12,71 @@ const App = () => {
 
   useEffect(() => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
+    personService
+      .getAll()
+      .then(initialPersons => {
         console.log('promise fulfilled')
-        setPersons(response.data)
+        setPersons(initialPersons)
       })
   }, [])
   
   const addNewPersons = () => {
-    const hasNumber = newNumber.length > 0
-    const nameObject = {
-      name: newName,
-      number: hasNumber ? newNumber : ''
+    const isAlreadyOnList = persons.some(person => person.name === newName)
+    
+    if (isAlreadyOnList) {
+      if (window.confirm(`${newName} is already added to phonebook. Do you want to update the number?`)) {
+        const person = persons.find(p => p.name = newName)
+        updatePerson(person)
+      } else {
+        emptyForm() 
+      }
+      
+    } else {
+      const hasNumber = newNumber.length > 0
+      const nameObject = {
+        name: newName,
+        number: hasNumber ? newNumber : ''
+      }
+
+      personService
+        .create(nameObject)
+        .then(returnedPerson => {
+          console.log('successful post')
+          setPersons(persons.concat(returnedPerson))
+          emptyForm()   
+        })
     }
-    setPersons(persons.concat(nameObject))
+    
   }
 
+  const updatePerson = ({person}) => {
+    const changedPerson = { ...person, number: newNumber }
+
+    personService
+      .update(person.id, changedPerson)
+      .then(returnedPerson => {
+        setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
+        emptyForm()
+      })
+  }
+
+  const deletePersonWithId = (id) => {
+    console.log(`${id} needs to be deleted`)
+    const name = persons.find(p => p.id === id).name
+    if (window.confirm(`Delete ${name} ?`)) {
+      personService
+        .deletePerson(id)
+        .then(returned => {
+          console.log('deleted',returned)
+          setPersons(persons.filter(p => p.id !== id))
+      })
+    }
+    
+  }
+  const emptyForm = () => {
+    setNewName('')
+    setNumber('')
+  }
   const setName = (name) => setNewName(name)
   const setNewNumber = (number) => setNumber(number)
   const setSearchBarText = (text) => setSearchBar(text)
@@ -43,7 +91,7 @@ const App = () => {
       >
       </Form>
       <h2>Numbers</h2>
-      <Persons persons = {persons} filter={searchBar}></Persons>
+      <Persons persons = {persons} deletePerson = {(person) => deletePersonWithId(person.id)} filter={searchBar}></Persons>
     </div>
   )
 

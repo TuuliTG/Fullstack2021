@@ -3,17 +3,8 @@ import React from "react";
 const Form = (props) => {
     const addName = (event) => {
         event.preventDefault()
-        const isAlreadyOnList = props.persons.some(person => person.name === props.newName)
-        
-        if (isAlreadyOnList) {
-          window.alert(`${props.newName} is already added to phonebook`)
-        } else {
-          
-          props.addPersons()
-        }
-        
-        props.setName('')
-        props.setNewNumber('')
+        props.addPersons()
+
       }
 
     const handleNameChange = (event) => {

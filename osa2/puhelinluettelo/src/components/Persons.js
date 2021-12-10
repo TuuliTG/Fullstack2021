@@ -10,8 +10,9 @@ const Persons = (props) => {
     return (
         <ul>
             {filtered.map(person =>
-            <li key={person.name}>
+            <li key={person.id}>
               {person.name} {person.number}
+              <button onClick={() => props.deletePerson(person)}>Delete</button>
             </li>
           )}
         </ul>
