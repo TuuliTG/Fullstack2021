@@ -1,6 +1,8 @@
 const { response } = require('express')
+require('dotenv').config()
 const express = require('express')
 const cors = require("cors");
+const Person = require('./models/person')
 
 const app = express()
 
@@ -15,7 +17,7 @@ morgan.token('content', (request) => {
 })
 
 app.use(morgan(":method :url :status :res[content-length] - :response-time ms :content"))
-
+/*
 let persons = [
     {
         id: 1,
@@ -44,29 +46,26 @@ const info =
     <br>
     ${new Date()}
     `
-const generatedId = () => {
-    return Math.floor(Math.random() * 100000)
-}
-
+*/
 app.get('/',(req, res) => {
     res.send('<h1>Hello World!</h1>')
 })
 app.get('/api/persons',(req, res) => {
-    res.json(persons)
+    Person.find({}).then(persons => {
+        res.json(persons)
+    })
 })
-
+/*
 app.get('/info', (req,res) => {
     res.send(info)
 })
-
+*/
 app.get('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id)
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
+   
+   Person.findById(id).then(person => {
+       res.json(person)
+   })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
@@ -87,23 +86,18 @@ app.post('/api/persons', (req, res) => {
         return res.status(400).json({
             error: 'Number missing'
         })
-    } else if (persons.find(p => p.name === body.name)) {
-        return res.status(400).json({
-            error: `Name ${body.name} is already on the list`
-        })
     }
-    
-    const newId = generatedId()
+    const person = new Person({
+        name: body.name,
+        number: body.number
+    })
 
-    const person = req.body
-    person.id = newId
-    persons = persons.concat(person)
-    
-    console.log(person)
-    res.json(person)
+    person.save().then(savedPerson => {
+        res.json(savedPerson)
+    })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
