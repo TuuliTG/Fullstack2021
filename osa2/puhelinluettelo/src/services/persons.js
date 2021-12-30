@@ -17,7 +17,7 @@ const update = (id, newObject) => {
 }
 
 const deletePerson = id => {
-    const url = `http://localhost:3001/api/persons/${id}`
+    const url = `${baseUrl}/${id}`
 
     const request = axios.delete(url)
     return request.then(response => response.data)
