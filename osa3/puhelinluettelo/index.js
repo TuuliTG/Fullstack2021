@@ -25,13 +25,22 @@ app.get('/api/persons',(req, res) => {
     })
 })
 
-/*
-app.get('/info', (req,res) => {
-    res.send(info)
+
+app.get('/info', (req,res, next) => {
+    const date = new Date()
+    const persons = Person.find({})
+        .then(p => {
+            res.send(
+                `<p>Phonebook has info for ${p.length} people.</p>
+                <p>${date}</p>
+                `
+            )
+        })
+        .catch(error => next(error))
 })
-*/
+
 app.get('/api/persons/:id', (req, res, next) => {
-    const id = Number(req.params.id)
+    const id = req.params.id
    
    Person.findById(id)
        .then(person => {
@@ -91,6 +100,8 @@ app.post('/api/persons', (req, res, next) => {
     })
     .catch(error => next(error))
 })
+
+
 
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
