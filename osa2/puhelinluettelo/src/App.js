@@ -13,11 +13,9 @@ const App = () => {
   const [message, setMessage] = useState(null)
 
   useEffect(() => {
-    console.log('effect')
     personService
       .getAll()
       .then(initialPersons => {
-        console.log('promise fulfilled')
         setPersons(initialPersons)
       })
   }, [])
@@ -44,11 +42,14 @@ const App = () => {
       personService
         .create(nameObject)
         .then(returnedPerson => {
-          console.log('successful post')
           setPersons(persons.concat(returnedPerson))
           emptyForm()
           const text = `Added ${returnedPerson.name}`   
           messageSetup(text, "message")
+        })
+        .catch(error => {
+          console.log(error.response.data)
+          messageSetup(error.response.data.error, "error")
         })
     }
     
@@ -56,7 +57,6 @@ const App = () => {
 
   const messageSetup = ( message, classText ) => {
     const msg = {text: message, classText: classText}
-    console.log("Message", msg)
     setMessage(msg)
     setTimeout(() => {
       setMessage(null)
@@ -64,7 +64,6 @@ const App = () => {
   }
 
   const updatePerson = ({person}) => {
-    console.log('Updating',{person})
     const changedPerson = { ...person, number: newNumber }
     
     personService
