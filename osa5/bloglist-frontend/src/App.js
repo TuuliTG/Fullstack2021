@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Notification from './components/Notification'
+import Togglable from './components/Togglable'
+import BlogForm from './components/BlogForm'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
-
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -59,62 +58,22 @@ const App = () => {
     }
   }
 
-  const addBlog = (event) => {
-      event.preventDefault()
-      const blogObject = {
-          title: title,
-          author: author,
-          url: url
-      }
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-
+  const addBlog = (blogObject) => {
       blogService
       .create(blogObject)
       .then(returnedBlog => {
         setBlogs(blogs.concat(returnedBlog))
       })
   }
-  
-  const blogForm = () => {
-    return (
-      <div>
-        <h2>Create a new blog</h2>
-        <form onSubmit={addBlog}>
-            <div>
-                Title
-                <input
-                  type="text"
-                  value={title}
-                  name="Title"
-                  onChange={({ target }) => setTitle(target.value)}
-                />
-            </div>
-            <div>
-                Author
-                <input
-                  type="text"
-                  value={author}
-                  name="Author"
-                  onChange={({ target }) => setAuthor(target.value)}
-                />
-            </div>
-            <div>
-                Url
-                <input
-                  type="text"
-                  value={url}
-                  name="Url"
-                  onChange={({ target }) => setUrl(target.value)}
-                />
-            </div>
-            <button type="submit">Create</button>
-        </form>
-      </div>
-    )
-  }
 
+  const blogForm = () => (
+    <Togglable buttonLabel="Create a new Blog">
+      <BlogForm
+        addBlog={addBlog}
+      />
+    </Togglable>
+  )
+  
   const loginForm = () => {
     return (
       <div>
@@ -159,7 +118,7 @@ const App = () => {
   return (
     <div>
       <h1>Blogs</h1>
-
+      <Notification message={errorMessage} />
       {user == null ?
         loginForm() :
         showBlogs()
