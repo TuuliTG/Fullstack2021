@@ -31,16 +31,24 @@ blogsRouter.post('/', async (request, response) => {
 
 blogsRouter.delete('/:id', async (request, response) => {
     const user = request.user
+    console.log("user who is trying to delete", user.name)
 
     if (!user) {
         return response.status(401).json({ error: 'token missing or invalid' })
     }
     const blog = await Blog.findById(request.params.id)
+    console.log("Blog has been added by",blog.user)
+    console.log("1", blog.user.toString())
+    console.log("2", user.id.toString())
+
     if ( blog.user.toString() === user.id.toString()) {
         await Blog.findByIdAndRemove(request.params.id)
+        response.status(204).end()
+    } else {
+      return response.status(401).json({ error: 'Can only be deleted by the user who has added the blog' })        
     }
     
-    response.status(204).end()
+    
 })
 
 blogsRouter.put('/:id', async (request, response) => {

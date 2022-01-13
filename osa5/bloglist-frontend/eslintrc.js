@@ -2,17 +2,21 @@ module.exports = {
     "env": {
         "browser": true,
         "es6": true,
-        "jest/globals": true,
-        "cypress/globals": true
+        "jest/globals": true 
     },
     "extends": [ 
-        "eslint:recommended"
+        "eslint:recommended",
+        "plugin:react/recommended"
     ],
     "parserOptions": {
-        'ecmaVersion' : 12
+        "ecmaFeatures": {
+            "jsx": true
         },
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
     "plugins": [
-        "react", "jest", "cypress"
+        "react", "jest"
     ],
     "rules": {
         "indent": [
@@ -40,11 +44,12 @@ module.exports = {
             "error", { "before": true, "after": true }
         ],
         "no-console": 0,
-        "react/prop-types": 0
+        "react/prop-types": 0,
+        "cypress/no-unnecessary-waiting": 0,
     },
     "settings": {
       "react": {
         "version": "detect"
       }
     }
-}
+  }

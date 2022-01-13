@@ -18,7 +18,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
+      setBlogs(blogs.sort((a,b) => b.likes - a.likes))
     )  
   }, [])
 
@@ -30,6 +30,14 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+  
+  const messageSetup = ( message, classText ) => {
+    const msg = {text: message, classText: classText}
+    setErrorMessage(msg)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 5000)
+  }
 
   const handleLogout = async (event) => {
     event.preventDefault()
@@ -40,7 +48,6 @@ const App = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    console.log('logging in with', username, password)
   
     try {
       const user = await loginService.login({
@@ -53,21 +60,47 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
+      messageSetup(`Log in successfull`, 'message')
     } catch (exception) {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      messageSetup('wrong credentials', 'error')
     }
   }
 
-  const addBlog = (blogObject) => {
-    blogFormRef.current.toggleVisibility()  
-    blogService
-      .create(blogObject)
-      .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-      })
+  const addBlog = async (blogObject) => {
+    blogFormRef.current.toggleVisibility()
+    const returnedBlog = await blogService.create(blogObject)
+    setBlogs(blogs.concat(returnedBlog).sort((a,b) => b.likes - a.likes))
+    messageSetup(`A new blog ${returnedBlog.title} by ${returnedBlog.author} added`, 'message')
+  }
+
+  const likeBlog = async (id) => {
+    const blog = blogs.find(b => b.id === id)
+    console.log('updating blog',blog)
+    const updatedBlog = {...blog, likes: blog.likes + 1, new:true}
+    console.log('likes now', updatedBlog.likes)
+
+    try {
+      const receivedBlog = await blogService.update(id, updatedBlog)
+      console.log('received: ',receivedBlog)
+      setBlogs(blogs.map(b => b.id !== id ?
+        b : receivedBlog)
+        .sort((a,b) => b.likes - a.likes)
+      )
+    } catch (exception) {
+      messageSetup('Not able to like the blog', 'error')
+    }
+  }
+
+  const deleteBlog = async (id) => {
+    const blog = blogs.find(b => b.id === id)
+    if (window.confirm(`Do you really want to delete ${blog.title} by ${blog.author}?`)) {
+      try {
+        await blogService.deleteBlog(id)
+        setBlogs(blogs.filter(b => b.id !== id).sort((a,b) => b.likes - a.likes))
+      } catch (exception) {
+        messageSetup(exception.response.data, 'error')
+      }
+    } 
   }
 
   const blogForm = () => (
@@ -95,10 +128,10 @@ const App = () => {
   const showBlogs = () => {
     return (
       <div>
-          <p>{user.name} logged in <button onClick={handleLogout}>Logout</button></p>
+          <p>{user.name} logged in <button id="logout-button" onClick={handleLogout}>Logout</button></p>
           {blogForm()}
           {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} />
+            <Blog key={blog.id} blog={blog} likeBlog={likeBlog} deleteBlog={deleteBlog} user={user}/>
           )}
       </div>
     )
