@@ -24,10 +24,12 @@ const AnecdoteList = () => {
     const anecdotes = useSelector(state => state.anecdotes.sort((a,b) => b.votes - a.votes))
     let filter = useSelector(state => state.filter)
     filter = filter.toLowerCase()
+    const prevTimeOut = useSelector(state => state.notification.timeOutId)
     const clickHandler = async (anecdote) => {
         dispatch(vote(anecdote.id))
         const text = `You voted '${anecdote.content}'`
-        dispatch(changeNotification(text, 5))
+        
+        dispatch(changeNotification(text, 5, prevTimeOut))
     }
 
     return(
